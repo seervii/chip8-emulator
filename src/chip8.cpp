@@ -573,7 +573,10 @@ void chip8::OP_8xyE()
     pc += 2;
 
     ((*this).*(table[(opcode & 0xF000u) >> 12u]))();
+  }
 
+  void chip8::UpdateTimers()
+  {
     if (delayTimer > 0)
     {
        --delayTimer;
