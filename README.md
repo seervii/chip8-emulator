@@ -5,6 +5,7 @@ A CHIP-8 emulator/interpreter written in C++, built from scratch to understand h
 ![Platform](https://img.shields.io/badge/platform-macOS-lightgrey)
 ![Language](https://img.shields.io/badge/language-C%2B%2B17-blue)
 ![Build](https://img.shields.io/badge/build-CMake-informational)
+[![Build Status](https://github.com/seervii/chip8-emulator/actions/workflows/build.yml/badge.svg)](https://github.com/seervii/chip8-emulator/actions/workflows/build.yml)
 
 ## What is CHIP-8?
 
