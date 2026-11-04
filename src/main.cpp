@@ -22,14 +22,15 @@ int main(int argc, char** argv)
 
     int videoPitch = sizeof(chip8.video[0]) * VIDEO_WIDTH;
 
-    auto lastCycleTime = std::chrono::high_resolution_clock::now();
+    auto lastCycleTime = std::chrono::steady_clock::now();
+    auto lastTimerTime = lastCycleTime;
     bool quit = false;
 
     while (!quit)
     {
         quit = platform.ProcessInput(chip8.keypad);
 
-        auto currentTime = std::chrono::high_resolution_clock::now();
+        auto currentTime = std::chrono::steady_clock::now();
         float dt = std::chrono::duration<float, std::chrono::milliseconds::period>(currentTime - lastCycleTime).count();
 
         if (dt > cycleDelay)
@@ -39,6 +40,14 @@ int main(int argc, char** argv)
             chip8.Cycle();
 
             platform.Update(chip8.video, videoPitch);
+        }
+
+        float timerDt = std::chrono::duration<float, std::chrono::milliseconds::period>(currentTime - lastTimerTime).count();
+
+        if (timerDt >= 1000.0f / 60.0f)
+        {
+            chip8.UpdateTimers();
+            lastTimerTime = currentTime;
         }
     }
 

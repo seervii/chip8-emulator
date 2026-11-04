@@ -80,4 +80,5 @@ class chip8
     uint16_t opcode{};
     
     void Cycle();
+    void UpdateTimers();
 };
