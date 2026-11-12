@@ -2,6 +2,7 @@
 #include <iostream>
 #include "chip8.h"
 #include "Platform.h"
+#include <stdexcept>
 
 int main(int argc, char** argv)
 {
@@ -37,7 +38,15 @@ int main(int argc, char** argv)
         {
             lastCycleTime = currentTime;
 
-            chip8.Cycle();
+            try
+            {
+                chip8.Cycle();
+            }
+            catch (std::runtime_error const& e)
+            {
+                std::cerr << "Emulator stopped: " << e.what() << "\n";
+                return EXIT_FAILURE;
+            }
 
             platform.Update(chip8.video, videoPitch);
         }

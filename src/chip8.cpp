@@ -3,6 +3,8 @@
 #include <fstream>
 #include <random>
 #include <chrono>
+#include <stdexcept>
+#include <string>
 
 using namespace std;
 
@@ -136,10 +138,13 @@ void chip8::OP_00E0()
 
 void chip8::OP_00EE()
 {
-  
+  if (sp == 0)
+  {
+    throw std::runtime_error("00EE: stack underflow");
+  }
+
   --sp;
   pc = stack[sp];
-
 }
 
 void chip8::OP_1nnn()
@@ -152,12 +157,16 @@ void chip8::OP_1nnn()
 
 void chip8::OP_2nnn()
 {
-
   uint16_t nnn = opcode & 0x0FFFu;
+
+  if (sp >= STACK_LEVELS)
+  {
+    throw std::runtime_error("2nnn: stack overflow");
+  }
+
   stack[sp] = pc;
   ++sp;
   pc = nnn;
- 
 }
 
 void chip8::OP_3xkk()
@@ -384,6 +393,11 @@ void chip8::OP_8xyE()
   uint8_t Vx = (opcode & 0x0F00u) >> 8u;
   uint8_t key = registers[Vx];
 
+  if (key >= KEY_COUNT)
+  {
+    throw std::runtime_error("Ex9E: key value is not 0-15");
+  }
+
   if (keypad[key])
   {
     pc +=2;
@@ -396,6 +410,11 @@ void chip8::OP_8xyE()
 
   uint8_t Vx = (opcode & 0x0F00u) >> 8u;
   uint8_t key = registers[Vx];
+
+  if (key >= KEY_COUNT)
+  {
+    throw std::runtime_error("ExA1: key value is not 0-15");
+  }
 
   if (!keypad[key])
   {
@@ -471,6 +490,8 @@ void chip8::OP_8xyE()
  void chip8::OP_Fx33()
  {
 
+  CheckMemoryRange(index, 3, "Fx33");
+
   uint8_t Vx = (opcode & 0x0F00u) >> 8u;
   uint8_t value = registers[Vx];
 
@@ -486,6 +507,8 @@ void chip8::OP_8xyE()
 
   uint8_t Vx = (opcode & 0x0F00u) >> 8u;
 
+  CheckMemoryRange(index, Vx + 1, "Fx55");
+
   for (uint8_t i = 0; i <= Vx; i++)
   {
     memory[index + i] = registers[i];
@@ -498,6 +521,8 @@ void chip8::OP_8xyE()
 
   uint8_t Vx = (opcode & 0x0F00u) >> 8u;
 
+  CheckMemoryRange(index, Vx + 1, "Fx65");
+
   for (uint8_t i = 0; i <= Vx; i++)
   {
      registers[i] = memory[index + i];
@@ -506,10 +531,11 @@ void chip8::OP_8xyE()
  }
   void chip8::OP_Dxyn()
   {
-
     uint8_t Vx = (opcode & 0x0F00u) >> 8u;
     uint8_t Vy = (opcode & 0x00F0u) >> 4u;
     uint8_t height = opcode & 0x000Fu;
+
+    CheckMemoryRange(index, height, "Dxyn");
 
     uint8_t xPos = registers[Vx] % VIDEO_WIDTH;
     uint8_t yPos = registers[Vy] % VIDEO_HEIGHT;
@@ -569,6 +595,8 @@ void chip8::OP_8xyE()
   void chip8::Cycle()
   {
 
+    CheckMemoryRange(pc, 2, "Fetch");
+
     opcode = (memory[pc] << 8u) | (memory[pc+1]);
     pc += 2;
 
@@ -587,5 +615,13 @@ void chip8::OP_8xyE()
       --soundTimer;
     }
   }
+
+  void chip8::CheckMemoryRange(unsigned int start, unsigned int count, char const* what) const
+{
+    if (start + count > MEMORY_SIZE)
+    {
+        throw std::runtime_error(std::string(what) + ": address " + std::to_string(start) + " is outside memory");
+    }
+}
 
   

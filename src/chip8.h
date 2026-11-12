@@ -15,6 +15,8 @@ class chip8
     
     chip8();
 
+    void CheckMemoryRange(unsigned int start, unsigned int count, char const* what) const;
+
     typedef void (chip8::*Chip8Func)();
     Chip8Func table[0xF + 1]{};
     Chip8Func table0[0xE + 1]{};
